@@ -1,6 +1,9 @@
-# DevOps Test
+# DISCLAIMER
+Currently, some URLs may be discontinued because the application were initially deployed using a free AWS account.
 
-This test has been solved by 5 steps through CI and CD by Gitlab CI
+# DevOps Application
+
+This application has been created by 5 steps through CI and CD by Gitlab CI
 and Ansible technologies that creates, deploy and test the java spring boot app
 with the definition of swagger: https://s3-eu-west-1.amazonaws.com/mmi-codechallenge/swagger-users-v1.json
 
