@@ -1,2 +1,5 @@
 
 .DS_Store
+*.kms
+infrastructure/.terraform/modules/eks/
+infrastructure/.terraform/modules/vpc/
