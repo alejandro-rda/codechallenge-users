@@ -3,3 +3,4 @@
 *.kms
 infrastructure/.terraform/modules/eks/
 infrastructure/.terraform/modules/vpc/
+/.idea/
