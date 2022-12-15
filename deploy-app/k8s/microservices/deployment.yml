@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-ninja
+  labels:
+    app: app-ninja
+  namespace: ninja
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-ninja
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: app-ninja
+    spec:
+      containers:
+      - image: 263677391119.dkr.ecr.us-west-2.amazonaws.com/ninjacode/codechallenge-devops-senior:latest
+        imagePullPolicy: Always
+        name: app-ninja
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 0.5
+          requests:
+            cpu: 0.5

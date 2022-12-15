@@ -1,0 +1,52 @@
+image:
+  name: hashicorp/terraform:light
+  entrypoint: [""]
+
+cache:
+  key: terraform
+  paths:
+    - .terraform
+
+variables:
+  AWS_ACCESS_KEY_ID:  $NONPROD_AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY: $NONPROD_AWS_SECRET_ACCESS_KEY
+  PLAN_FILE: output_plan.json
+  PLAN_FIL_DIR: infrastructure/output_plan.json
+
+before_script:
+  - cd infrastructure
+  - terraform init
+  - terraform get
+
+stages:
+  - format
+  - validate
+  - plan
+  - apply
+
+check format:
+  stage: format
+  script:
+    - terraform fmt
+
+validate:
+  stage: validate
+  environment: nonprod
+  script:
+    - terraform validate
+
+plan_nonprod:
+  stage: plan
+  script:
+    - terraform plan -out=$PLAN_FILE
+  artifacts:
+    paths:
+      - $PLAN_FIL_DIR
+
+apply_nonprod:
+  stage: apply
+  needs:
+    - plan_nonprod
+  script:
+    - terraform apply $PLAN_FILE
+

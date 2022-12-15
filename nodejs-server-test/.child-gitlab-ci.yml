@@ -1,0 +1,11 @@
+image: node:latest
+
+stages:
+  - run
+
+build app:
+  stage: run
+  script:
+    - cd nodejs-server-test
+    - npm install
+    - node test.js

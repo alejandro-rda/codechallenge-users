@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  connection: local
+
+  collections:
+    - kubernetes.core
+  tasks:
+    - name: Deploy Namespace
+      kubernetes.core.k8s:
+        kubeconfig: kubeconfig
+        state: present
+        src: k8s/microservices/namespace.yml
+
+    - name: Deploy Deployment
+      kubernetes.core.k8s:
+        state: present
+        src: k8s/microservices/deployment.yml
+
+    - name: Deploy Service
+      kubernetes.core.k8s:
+        state: present
+        src: k8s/microservices/service.yml
+
+    - name: Deploy HPA
+      kubernetes.core.k8s:
+        state: present
+        src: k8s/microservices/hpa.yml

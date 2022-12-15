@@ -1,0 +1,16 @@
+image:
+  name: egaillardon/jmeter-plugins
+  entrypoint: [ "" ]
+
+stages:
+  - load
+
+load test:
+  stage: load
+  script:
+    - cd load-testing
+    - jmeter -n -t ninja2.jmx -l output.jtl -e -o target/JUnitReport/report.xml
+  artifacts:
+    when: always
+    paths:
+      - load-testing/target/JUnitReport/

@@ -1,0 +1,21 @@
+image: willhallonline/ansible
+
+variables:
+  ANSIBLE_HOST_KEY_CHECKING: "False"
+  AWS_ACCESS_KEY_ID: $NONPROD_AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY: $NONPROD_AWS_SECRET_ACCESS_KEY
+  AWS_DEFAULT_REGION: us-east-2
+
+stages:
+  - deploy ansible
+
+deploy:
+  stage: deploy ansible
+  script:
+    - ansible --version
+    - pip install boto boto3 netaddr passlib kubernetes awscli
+    - aws eks update-kubeconfig --region us-east-2  --name education-eks-3rcWsQbv
+    - cp /root/.kube/config deploy-app/kubeconfig
+    - cd deploy-app
+    - ansible-galaxy collection install kubernetes.core
+    - ansible-playbook deploy-service.playbook.yml

@@ -1,0 +1,82 @@
+stages:
+  - test
+  - compile
+  - build
+  - publish-nonprod
+
+variables:
+  AWS_DEFAULT_REGION: us-west-2
+
+Unit test:
+  stage: test
+  image: maven:3.8-openjdk-11
+  script:
+  - mvn test
+
+Compile app:
+   stage: compile
+   image: maven:3.8-openjdk-11
+   script:
+   - mvn package
+   - mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+   artifacts:
+     name: "Maven artifact from $CI_PROJECT_NAME on $CI_COMMIT_REF_SLUG"
+     paths:
+       - target/*.jar
+       - target/dependency/*
+
+Build image:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:19.03.12-dind
+  variables:
+    VERSION: "3.2.6"
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:latest || echo "image do not exists yet."
+    - >
+      docker build
+      --cache-from $CI_REGISTRY_IMAGE:latest
+      --build-arg VERSION=$VERSION
+      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+      --tag $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+  needs:
+    - Compile app
+
+.publish-base:
+  image: docker:20.10.16
+  services:
+    - docker:19.03.12-dind
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - IMAGE_NAME=$(echo $CI_REGISTRY_IMAGE | awk -F/ '{print $NF}')
+    - docker pull $CI_REGISTRY_IMAGE:latest
+    - docker tag $CI_REGISTRY_IMAGE:latest $REPOSITORY/$IMAGE_NAME:latest
+    - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    - docker tag $CI_REGISTRY_IMAGE:latest $REPOSITORY/$IMAGE_NAME:$CI_COMMIT_REF_NAME
+    - >
+      docker run
+      --interactive --rm
+      --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      --env AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+      amazon/aws-cli:2.0.59 ecr get-login-password
+      | docker login -u AWS --password-stdin $REPOSITORY
+    - docker push $REPOSITORY/$IMAGE_NAME:latest
+    - docker push $REPOSITORY/$IMAGE_NAME:$CI_COMMIT_REF_NAME
+
+Publish nonprod image:
+  stage: publish-nonprod
+  variables:
+    AWS_ACCESS_KEY_ID: $NONPROD_AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $NONPROD_AWS_SECRET_ACCESS_KEY
+    REPOSITORY: 263677391119.dkr.ecr.us-west-2.amazonaws.com/ninjacode
+  extends:
+    - .publish-base
+

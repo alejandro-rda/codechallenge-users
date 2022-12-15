@@ -1,0 +1,1 @@
+This is the directory of the reports and artifacts of the Jmeter execution

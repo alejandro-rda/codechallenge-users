@@ -1,0 +1,7 @@
+{
+  "name": "codechallenge-devops-senior",
+  "version": "1.0.0",
+  "dependencies": {
+    "newman": "^5.3.2"
+  }
+}
