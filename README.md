@@ -5,7 +5,7 @@ Currently, some URLs may be discontinued because the application were initially 
 
 This application has been created by 5 steps through CI and CD by Gitlab CI
 and Ansible technologies that creates, deploy and test the java spring boot app
-with the definition of swagger: https://s3-eu-west-1.amazonaws.com/mmi-codechallenge/swagger-users-v1.json
+with the definition of swagger: https://raw.githubusercontent.com/alejandro-rda/codechallenge-users/main/swagger-users-v1.json
 
 The main CI pipeline have these steps that is divide in 5 children pipelines that
 run everything that you need to deploy this application in AWS EKS:
