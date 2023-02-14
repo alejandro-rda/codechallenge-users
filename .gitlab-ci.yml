@@ -1,0 +1,55 @@
+variables:
+  CI_TOKEN: "gitlab-ci-token:${CI_JOB_TOKEN}@"
+
+stages:
+  - build-infra
+  - build-app
+  - deploy-app
+  - test-app
+  - load-test-app
+
+k8s-resources:
+  stage: build-infra
+  variables:
+    MODULE: infrastructure
+  trigger:
+    include:
+    - local: '/infrastructure/.child-gitlab-ci.yml'
+  when: manual
+
+build-image:
+  stage: build-app
+  variables:
+        MODULE: app-infrastructure
+  trigger:
+    include:
+      - local: '/app-infrastructure/.child-gitlab-ci.yml'
+  when: manual
+
+deploy-app:
+  stage: deploy-app
+  variables:
+    MODULE: deploy-app
+  trigger:
+    include:
+      - local: '/deploy-app/.child-gitlab-ci.yml'
+  when: manual
+
+test-node-app:
+  stage: test-app
+  variables:
+    MODULE: test-app
+  trigger:
+    include:
+      - local: '/nodejs-server-test/.child-gitlab-ci.yml'
+  when: manual
+
+load-test-app:
+  stage: load-test-app
+  variables:
+    MODULE: load-test-app
+  trigger:
+    include:
+      - local: '/load-testing/.child-gitlab-ci.yml'
+  when: manual
+
